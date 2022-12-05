@@ -31,15 +31,11 @@ fn main() {
     let lines: Vec<String> = read_lines("input/d03.txt").unwrap().map(|l| l.unwrap()).collect();
     let groups = lines.chunks(3);
     for group in groups {
-        let badge = group.iter()
+        let group_intersection: HashSet<char> = group.iter()
             .map(|g| HashSet::from_iter(g.chars()))
-            .fold(HashSet::new(), |acc, g| {
-                if acc.is_empty() {
-                    g
-                } else {
-                    acc.intersection(&g).copied().collect()
-                }
-            }).iter().next().copied().unwrap();
+            .reduce(|acc, g| acc.intersection(&g).copied().collect())
+            .unwrap();
+        let badge = group_intersection.iter().next().copied().unwrap();
         sum_prio += prio(badge);
     }
     println!("{}", sum_prio);
