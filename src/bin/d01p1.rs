@@ -1,13 +1,12 @@
 use std::cmp::max;
-use aoc2022::read_lines;
+use aoc2022::try_read_lines;
 
 fn main() {
-    let lines = read_lines("input/d01.txt").unwrap().lines();
+    let lines = try_read_lines("input/d01.txt");
     let mut max_cals = 0;
     let mut sum_cals = 0;
     for line in lines {
-        let s = line.unwrap();
-        let r = s.trim();
+        let r = line.trim();
         if r.is_empty() {
             sum_cals = 0;
             continue;

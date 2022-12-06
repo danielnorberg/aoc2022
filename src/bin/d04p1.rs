@@ -1,7 +1,4 @@
-use std::collections::HashSet;
 use std::str::FromStr;
-
-use aoc2022::read_lines;
 
 fn main() {
     let lines = aoc2022::try_read_lines("input/d04.txt");
