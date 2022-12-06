@@ -8,3 +8,7 @@ pub fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
     Ok(io::BufReader::new(file).lines())
 }
 
+pub fn try_read_lines(filename: &str) -> Vec<String> {
+    read_lines(filename).unwrap().map(|l| l.unwrap()).collect()
+}
+
