@@ -27,10 +27,6 @@ fn find_viewing_scores(grid: &Vec<Vec<i32>>) -> Vec<Vec<i32>> {
     scores
 }
 
-fn print_grid(grid: &Vec<Vec<i32>>) {
-    grid.iter().for_each(|r| println!("{:?}", r));
-}
-
 fn find_viewing_score(grid: &Vec<Vec<i32>>, r: i32, c: i32, height: i32, width: i32) -> i32 {
     viewing_score(grid, r, c, height, width, 0, 1)
         * viewing_score(grid, r, c, height, width, 0, -1)
@@ -104,6 +100,10 @@ mod tests {
     use super::*;
 
     const SAMPLE: &str = include_str!("../../input/d08_sample.txt");
+
+    fn print_grid(grid: &Vec<Vec<i32>>) {
+        grid.iter().for_each(|r| println!("{:?}", r));
+    }
 
     #[test]
     fn test1() {
