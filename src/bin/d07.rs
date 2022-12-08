@@ -6,7 +6,6 @@ use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use std::rc::Rc;
 use std::str::FromStr;
-use itertools::Itertools;
 use lazy_static::lazy_static;
 use regex::Regex;
 
