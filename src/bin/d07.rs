@@ -1,6 +1,5 @@
 extern crate core;
 
-use std::borrow::BorrowMut;
 use std::cell::RefCell;
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
@@ -86,7 +85,7 @@ fn parse(input: &str) -> DirRc {
             continue;
         } else if line.starts_with("dir ") {
             let dirname = &line[4..];
-            match (*dir.borrow_mut().as_ref().borrow_mut()).dirs.entry(String::from(dirname)) {
+            match (*dir.as_ref().borrow_mut()).dirs.entry(String::from(dirname)) {
                 Entry::Occupied(o) => { o.get() }
                 Entry::Vacant(v) => { v.insert(Dir::new_rc()) }
             };
@@ -96,7 +95,7 @@ fn parse(input: &str) -> DirRc {
                 Some(c) => {
                     let size = usize::from_str(c.name("size").unwrap().as_str()).unwrap();
                     let name = c.name("name").unwrap().as_str();
-                    match (*dir.borrow_mut().as_ref().borrow_mut()).files.entry(String::from(name)) {
+                    match (*dir.as_ref().borrow_mut()).files.entry(String::from(name)) {
                         Entry::Occupied(o) => { o.get() }
                         Entry::Vacant(v) => { v.insert(size) }
                     };
