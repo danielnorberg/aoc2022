@@ -7,6 +7,52 @@ fn main() {
     let grid = parse(INPUT);
     let (_, total_visible) = find_visible_trees(&grid);
     println!("part 1: {}", total_visible);
+
+    let scores = find_viewing_scores(&grid);
+    let max_score = scores.iter().flat_map(|r| r.iter()).max().unwrap();
+    println!("part 2: {}", max_score);
+}
+
+fn find_viewing_scores(grid: &Vec<Vec<i32>>) -> Vec<Vec<i32>> {
+    let mut scores = grid.clone();
+
+    let height = scores.len();
+    let width = scores[0].len();
+
+    for r in 0..height {
+        for c in 0..width {
+            scores[r][c] = find_viewing_score(&grid, r as i32, c as i32, height as i32, width as i32);
+        }
+    }
+    scores
+}
+
+fn print_grid(grid: &Vec<Vec<i32>>) {
+    grid.iter().for_each(|r| println!("{:?}", r));
+}
+
+fn find_viewing_score(grid: &Vec<Vec<i32>>, r: i32, c: i32, height: i32, width: i32) -> i32 {
+    viewing_score(grid, r, c, height, width, 0, 1)
+        * viewing_score(grid, r, c, height, width, 0, -1)
+        * viewing_score(grid, r, c, height, width, 1, 0)
+        * viewing_score(grid, r, c, height, width, -1, 0)
+}
+
+fn viewing_score(grid: &Vec<Vec<i32>>, mut ri: i32, mut ci: i32, height: i32, width: i32, dr: i32, dc: i32) -> i32 {
+    let origin_tree = grid[ri as usize][ci as usize];
+    let mut score = 0;
+    ri += dr;
+    ci += dc;
+    while ri >= 0 && ri < height && ci >= 0 && ci < width {
+        score += 1;
+        let tree = grid[ri as usize][ci as usize];
+        if tree >= origin_tree {
+            break;
+        }
+        ri += dr;
+        ci += dc;
+    }
+    score
 }
 
 fn find_visible_trees(grid: &Vec<Vec<i32>>) -> (Vec<BitVec>, usize) {
@@ -59,10 +105,6 @@ mod tests {
 
     const SAMPLE: &str = include_str!("../../input/d08_sample.txt");
 
-    fn print_grid(grid: &Vec<Vec<i32>>) {
-        grid.iter().for_each(|r| println!("{:?}", r));
-    }
-
     #[test]
     fn test1() {
         let grid = parse(SAMPLE);
@@ -71,5 +113,15 @@ mod tests {
         let (visible, total_visible) = find_visible_trees(&grid);
         println!("visible: {:#?}", visible);
         assert_eq!(total_visible, 21);
+    }
+
+    #[test]
+    fn test2() {
+        let grid = parse(SAMPLE);
+        let scores = find_viewing_scores(&grid);
+        println!("grid: ");
+        print_grid(&grid);
+        println!("scores: ");
+        print_grid(&scores);
     }
 }
