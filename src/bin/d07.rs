@@ -6,6 +6,7 @@ use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use std::rc::Rc;
 use std::str::FromStr;
+use itertools::Itertools;
 use lazy_static::lazy_static;
 use regex::Regex;
 
@@ -62,14 +63,13 @@ fn parse(input: &str) -> DirRc {
     lazy_static! {
         static ref FILE_RE: Regex = Regex::new(r"^(?P<size>\d+) (?P<name>.*)$").unwrap();
     }
-    let lines = input.trim().lines().map(String::from).collect::<Vec<String>>();
-    let mut i: usize = 0;
+    let lines = input.trim().lines().map(|l| l.trim().to_string());
+
     let root = Dir::new_rc();
     let mut path = Vec::<DirRc>::new();
     let mut dir = root.clone();
-    while i < lines.len() {
-        let line = lines.get(i).unwrap().trim();
-        i += 1;
+
+    for line in lines {
         if line == "$ cd /" {
             dir = root.clone();
             path.clear();
@@ -77,7 +77,7 @@ fn parse(input: &str) -> DirRc {
             dir = path.pop().unwrap().clone();
         } else if line.starts_with("$ cd ") {
             let dirname = &line[5..];
-            let next_dir = match (*dir.borrow_mut().as_ref().borrow_mut()).dirs.entry(String::from(dirname)) {
+            let next_dir = match dir.as_ref().borrow_mut().dirs.entry(String::from(dirname)) {
                 Entry::Occupied(o) => { o.get().clone() }
                 Entry::Vacant(v) => { v.insert(Dir::new_rc()).clone() }
             };
@@ -90,7 +90,7 @@ fn parse(input: &str) -> DirRc {
                 Entry::Vacant(v) => { v.insert(Dir::new_rc()) }
             };
         } else {
-            let caps = FILE_RE.captures(line);
+            let caps = FILE_RE.captures(&line);
             match caps {
                 Some(c) => {
                     let size = usize::from_str(c.name("size").unwrap().as_str()).unwrap();
@@ -103,9 +103,6 @@ fn parse(input: &str) -> DirRc {
                 None => { panic!(); }
             }
         }
-
-        // println!("{}: {}: {:#?}", i, line, root);
-        // println!("");
     }
     root
 }
