@@ -37,14 +37,24 @@ impl Dir {
         files + dirs
     }
 
-    pub fn find_size_le(&self, max_size: usize) -> usize {
+    pub fn sum_size_le(&self, max_size: usize) -> usize {
         let this = self.size();
-        let dirs_sum = self.dirs.iter().map(|(_, dir)| dir.borrow().find_size_le(max_size)).sum();
+        let dirs_sum = self.dirs.iter().map(|(_, dir)| dir.borrow().sum_size_le(max_size)).sum();
         if this < max_size {
             dirs_sum + this
         } else {
             dirs_sum
         }
+    }
+
+    pub fn find_min_size_ge(&self, min_size: usize) -> Option<usize> {
+        let this = Some(self.size()).filter(|s| s >= &min_size);
+        let min_dir = self.dirs.iter()
+            .map(|(_, dir)| dir.borrow().find_min_size_ge(min_size))
+            .filter(|o| o.is_some())
+            .map(|o| o.unwrap())
+            .min();
+        [this, min_dir].iter().flat_map(|n| n.iter()).min().map(|c| *c)
     }
 }
 
@@ -102,7 +112,17 @@ fn parse(input: &str) -> DirRc {
 
 fn main() {
     let root = parse(INPUT);
-    println!("{}", root.borrow().find_size_le(100000))
+    println!("part1: {}", root.borrow().sum_size_le(100000));
+    println!("part2: {}", find_dir_to_delete(root));
+}
+
+fn find_dir_to_delete(root: DirRc) -> usize {
+    let total_disk_space: usize = 70000000;
+    let disk_space_required: usize = 30000000;
+    let disk_space_used = root.borrow().size();
+    let disk_space_free = total_disk_space - disk_space_used;
+    let additional_disk_space_required = disk_space_required - disk_space_free;
+    root.borrow().find_min_size_ge(additional_disk_space_required).unwrap()
 }
 
 #[cfg(test)]
@@ -112,9 +132,15 @@ mod tests {
     const SAMPLE: &str = include_str!("../../input/d07_sample.txt");
 
     #[test]
-    fn test() {
+    fn test1() {
         let root = parse(SAMPLE);
         // println!("{:#?}", root);
-        assert_eq!(root.borrow().find_size_le(100000), 95437);
+        assert_eq!(root.borrow().sum_size_le(100000), 95437);
+    }
+
+    #[test]
+    fn test2() {
+        let root = parse(SAMPLE);
+        find_dir_to_delete(root);
     }
 }
