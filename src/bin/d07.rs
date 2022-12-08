@@ -83,7 +83,9 @@ fn parse(input: &str) -> DirRc {
             };
             path.push(dir);
             dir = next_dir;
-        } else if line.starts_with("$ ls") {} else if line.starts_with("dir ") {
+        } else if line.starts_with("$ ls") {
+            continue;
+        } else if line.starts_with("dir ") {
             let dirname = &line[4..];
             match (*dir.borrow_mut().as_ref().borrow_mut()).dirs.entry(String::from(dirname)) {
                 Entry::Occupied(o) => { o.get() }
