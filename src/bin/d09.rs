@@ -9,8 +9,8 @@ const INPUT: &str = include_str!("../../input/d09.txt");
 
 fn main() {
     let moves = parse(INPUT);
-    let n = count_tail_positions(&moves, 2);
-    println!("positions: {}", n);
+    println!("positions 2 knots: {}", count_tail_positions(&moves, 2));
+    println!("positions 10 knots: {}", count_tail_positions(&moves, 10));
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, EnumString)]
@@ -92,12 +92,20 @@ fn knot_step(h: Pos, t: &mut Pos) {
 mod tests {
     use super::*;
 
-    const SAMPLE: &str = include_str!("../../input/d09_sample.txt");
+    const SAMPLE1: &str = include_str!("../../input/d09_sample1.txt");
+    const SAMPLE2: &str = include_str!("../../input/d09_sample2.txt");
 
     #[test]
     fn test1() {
-        let moves = parse(SAMPLE);
+        let moves = parse(SAMPLE1);
         let n = count_tail_positions(&moves, 2);
         assert_eq!(13, n);
+    }
+
+    #[test]
+    fn test2() {
+        let moves = parse(SAMPLE2);
+        let n = count_tail_positions(&moves, 10);
+        assert_eq!(36, n);
     }
 }
