@@ -1,4 +1,5 @@
 use std::collections::HashSet;
+use std::ops;
 use std::str::FromStr;
 
 use itertools::Itertools;
@@ -8,7 +9,7 @@ const INPUT: &str = include_str!("../../input/d09.txt");
 
 fn main() {
     let moves = parse(INPUT);
-    let n = count_positions(&moves);
+    let n = count_tail_positions(&moves, 2);
     println!("positions: {}", n);
 }
 
@@ -32,6 +33,14 @@ struct Pos {
     y: i32,
 }
 
+impl ops::Add<Pos> for Pos {
+    type Output = Pos;
+
+    fn add(self, _rhs: Pos) -> Pos {
+        Pos { x: self.x + _rhs.x, y: self.y + _rhs.y }
+    }
+}
+
 fn parse_row(s: &str) -> Option<Move> {
     let mut parts = s.trim().split_whitespace();
     let d = Direction::from_str(parts.next()?).ok()?;
@@ -45,15 +54,19 @@ fn parse(s: &str) -> Vec<Move> {
         .collect_vec();
 }
 
-fn count_positions(moves: &Vec<Move>) -> usize {
-    let mut head = Pos { x: 0, y: 0 };
-    let mut tail = Pos { x: 0, y: 0 };
+fn count_tail_positions(moves: &Vec<Move>, n_knots: usize) -> usize {
+    let mut knots = vec![Pos { x: 0, y: 0 }; n_knots];
     let mut positions = HashSet::<Pos>::new();
     for m in moves {
         for _ in 0..m.n {
-            head_step(&mut head, &m.d);
-            tail_step(&mut tail, &head);
-            positions.insert(tail);
+            let head = &mut knots[0];
+            head_step(head, &m.d);
+            for i in 0..n_knots - 1 {
+                let k1 = knots[i];
+                let k2 = &mut knots[i + 1];
+                knot_step(k1, k2);
+            }
+            positions.insert(*knots.last().unwrap());
         }
     }
     positions.len()
@@ -68,7 +81,7 @@ fn head_step(h: &mut Pos, d: &Direction) {
     };
 }
 
-fn tail_step(t: &mut Pos, h: &Pos) {
+fn knot_step(h: Pos, t: &mut Pos) {
     if (h.x - t.x).abs() > 1 || (h.y - t.y).abs() > 1 {
         t.x += (h.x - t.x).signum();
         t.y += (h.y - t.y).signum();
@@ -84,8 +97,7 @@ mod tests {
     #[test]
     fn test1() {
         let moves = parse(SAMPLE);
-        println!("moves: {:#?}", moves);
-        let n = count_positions(&moves);
-        println!("positions: {}", n);
+        let n = count_tail_positions(&moves, 2);
+        assert_eq!(13, n);
     }
 }
