@@ -7,21 +7,23 @@ const INPUT: &str = include_str!("../../input/d10.txt");
 
 fn main() {
     let insts = parse(INPUT);
-    let sum = signal_strength_sum(&insts);
+    let (sum, rows) = execute(&insts);
     println!("sum: {}", sum);
+    println!("{}", rows.join("\n"));
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, EnumString)]
+#[strum(ascii_case_insensitive)]
 enum Inst {
-    noop,
-    addx(i32),
+    Noop,
+    Addx(i32),
 }
 
 fn parse_row(s: &str) -> Option<Inst> {
     let mut parts = s.trim().split_whitespace();
     let t = Inst::from_str(parts.next()?).ok()?;
     let i = match t {
-        Inst::addx(_) => { Inst::addx(parts.next()?.parse::<i32>().ok()?) }
+        Inst::Addx(_) => { Inst::Addx(parts.next()?.parse::<i32>().ok()?) }
         _ => t
     };
     Some(i)
@@ -33,33 +35,46 @@ fn parse(s: &str) -> Vec<Inst> {
         .collect_vec();
 }
 
-fn inc_cycle(cycle: &mut i32, reg: i32, sum: &mut i32) {
-    if (*cycle - 20) % 40 == 0 {
-        *sum += *cycle * reg;
-        println!("cycle: {}, reg: {}, sum: {}", *cycle, reg, *sum);
-    }
-    *cycle += 1;
-}
-
-fn signal_strength_sum(insts: &Vec<Inst>) -> i32 {
+fn execute(insts: &Vec<Inst>) -> (i32, Vec<String>) {
     let mut cycle = 1;
     let mut reg = 1;
     let mut sum = 0;
+    let mut col = 0;
+    let mut row = String::new();
+    let mut rows = Vec::<String>::new();
     for i in insts {
-        match i {
-            Inst::noop => {
-                inc_cycle(&mut cycle, reg, &mut sum);
+        let (cycles, result) = match i {
+            Inst::Noop => {
+                (1, reg)
             }
-            Inst::addx(x) => {
-                inc_cycle(&mut cycle, reg, &mut sum);
-                inc_cycle(&mut cycle, reg, &mut sum);
-                reg += x;
+            Inst::Addx(x) => {
+                (2, reg + x)
+            }
+        };
+        for _ in 0..cycles {
+            if (cycle - 20) % 40 == 0 {
+                sum += cycle * reg;
+            }
+            if reg - 1 <= col && col <= reg + 1 {
+                row.push('#');
+            } else {
+                row.push('.');
+            }
+            cycle += 1;
+            col += 1;
+            if col >= COLS {
+                col = 0;
+                rows.push(row);
+                row = String::new();
+                println!();
             }
         }
+        reg = result;
     }
-    // inc_cycle(&mut cycle, reg, &mut sum);
-    sum
+    (sum, rows)
 }
+
+const COLS: i32 = 40;
 
 #[cfg(test)]
 mod tests {
@@ -71,7 +86,7 @@ mod tests {
     #[test]
     fn test1() {
         let insts = parse(SAMPLE1);
-        let sum = signal_strength_sum(&insts);
+        let (sum, rows) = execute(&insts);
         println!("{:#?}", insts);
         println!("sum: {}", sum);
     }
@@ -79,7 +94,8 @@ mod tests {
     #[test]
     fn test2() {
         let insts = parse(SAMPLE2);
-        let sum = signal_strength_sum(&insts);
+        let (sum, rows) = execute(&insts);
         println!("sum: {}", sum);
+        println!("{}", rows.join("\n"));
     }
 }
