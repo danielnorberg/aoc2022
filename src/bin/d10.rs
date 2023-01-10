@@ -89,6 +89,7 @@ mod tests {
         let (sum, rows) = execute(&insts);
         println!("{:#?}", insts);
         println!("sum: {}", sum);
+        println!("{}", rows.join("\n"));
     }
 
     #[test]
