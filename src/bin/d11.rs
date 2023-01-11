@@ -1,21 +1,28 @@
-use std::borrow::BorrowMut;
 use std::collections::VecDeque;
+use std::i32;
 use std::str::FromStr;
-use itertools::{enumerate, Itertools};
+use itertools::Itertools;
 use crate::Operand::{Constant, Old};
 use crate::Operation::{Mul, Plus};
 
 const INPUT: &str = include_str!("../../input/d11.txt");
 
 fn main() {
-    let mut monkeys = parse(INPUT);
-    play(&mut monkeys, 20);
+    {
+        let mut monkeys = parse(INPUT);
+        play(&mut monkeys, 20, 3);
+    }
+
+    {
+        let mut monkeys = parse(INPUT);
+        play(&mut monkeys, 10000, 1);
+    }
 }
 
 #[derive(Debug, PartialEq, Eq, Hash)]
 enum Operand {
     Old,
-    Constant(i32),
+    Constant(i64),
 }
 
 #[derive(Debug, PartialEq, Eq, Hash)]
@@ -25,7 +32,7 @@ enum Operation {
 }
 
 impl Operand {
-    pub(crate) fn value(&self, old: i32) -> i32 {
+    pub(crate) fn value(&self, old: i64) -> i64 {
         match self {
             Old => old,
             Constant(c) => *c,
@@ -34,7 +41,7 @@ impl Operand {
 }
 
 impl Operation {
-    pub(crate) fn worry_level(&self, old: i32) -> i32 {
+    pub(crate) fn worry_level(&self, old: i64) -> i64 {
         match self {
             Mul(a, b) => { a.value(old) * b.value(old) }
             Plus(a, b) => { a.value(old) + b.value(old) }
@@ -45,12 +52,12 @@ impl Operation {
 #[derive(Debug, PartialEq, Eq, Hash)]
 struct Monkey {
     id: i32,
-    items: VecDeque<i32>,
+    items: VecDeque<i64>,
     operation: Operation,
-    test_divisible_by: i32,
+    test_divisible_by: i64,
     if_true_throw_to_monkey: usize,
     if_false_throw_to_monkey: usize,
-    inspections: i32,
+    inspections: i64,
 }
 
 fn parse_monkey<'a, I>(s: I) -> Option<Monkey>
@@ -62,7 +69,7 @@ fn parse_monkey<'a, I>(s: I) -> Option<Monkey>
             .strip_prefix("Monkey ")?
             .strip_suffix(":")?.trim()).ok()?,
         items: i.next()?.trim().strip_prefix("Starting items: ")?
-            .split(", ").flat_map(|s| i32::from_str(s.trim())).collect(),
+            .split(", ").flat_map(|s| i64::from_str(s.trim())).collect(),
         operation: {
             let mut tokens = i.next()?.trim().strip_prefix("Operation: new =")?.split_whitespace();
             let a = operand(tokens.next()?)?;
@@ -74,7 +81,7 @@ fn parse_monkey<'a, I>(s: I) -> Option<Monkey>
                 _ => panic!(),
             }
         },
-        test_divisible_by: i32::from_str(i.next()?.trim().strip_prefix("Test: divisible by ")?).ok()?,
+        test_divisible_by: i64::from_str(i.next()?.trim().strip_prefix("Test: divisible by ")?).ok()?,
         if_true_throw_to_monkey: usize::from_str(i.next()?.trim().strip_prefix("If true: throw to monkey ")?).ok()?,
         if_false_throw_to_monkey: usize::from_str(i.next()?.trim().strip_prefix("If false: throw to monkey ")?).ok()?,
         inspections: 0,
@@ -84,7 +91,7 @@ fn parse_monkey<'a, I>(s: I) -> Option<Monkey>
 fn operand(s: &str) -> Option<Operand> {
     match s {
         "old" => Some(Old),
-        s => Some(Constant(i32::from_str(s).ok()?))
+        s => Some(Constant(i64::from_str(s).ok()?))
     }
 }
 
@@ -101,15 +108,18 @@ fn parse(s: &str) -> Vec<Monkey> {
     monkeys
 }
 
-fn round(monkeys: &mut Vec<Monkey>) {
+fn round(monkeys: &mut Vec<Monkey>, worry_level_divisor: i64) {
+    let test_divisor_product = monkeys.iter()
+        .map(|m| m.test_divisible_by)
+        .reduce(|a, b| a * b).unwrap();
     for i in 0..monkeys.len() {
         let n = monkeys[i].items.len();
         for _ in 0..n {
-            let monkey = monkeys[i].borrow_mut();
+            let monkey = &mut monkeys[i];
             monkey.inspections += 1;
             let item = monkey.items.pop_front().unwrap();
-            let new_item = monkey.operation.worry_level(item) / 3;
-            let next_monkey = if new_item % monkey.test_divisible_by == 0 {
+            let new_item = (monkey.operation.worry_level(item) / worry_level_divisor) % test_divisor_product;
+            let next_monkey = if new_item.clone() % monkey.test_divisible_by == 0 {
                 monkey.if_true_throw_to_monkey
             } else {
                 monkey.if_false_throw_to_monkey
@@ -120,9 +130,9 @@ fn round(monkeys: &mut Vec<Monkey>) {
     }
 }
 
-fn play(monkeys: &mut Vec<Monkey>, rounds: usize) {
+fn play(monkeys: &mut Vec<Monkey>, rounds: usize, worry_level_divisor: i64) -> i64 {
     for _ in 0..rounds {
-        round(monkeys);
+        round(monkeys, worry_level_divisor);
     }
     monkeys.iter()
         .for_each(|monkey| println!("Monkey {} inspected items {} times.", monkey.id, monkey.inspections));
@@ -132,6 +142,7 @@ fn play(monkeys: &mut Vec<Monkey>, rounds: usize) {
         .reduce(|a, b| a * b)
         .unwrap();
     println!("Monkey business: {}", business);
+    business
 }
 
 #[cfg(test)]
@@ -144,6 +155,14 @@ mod tests {
     #[test]
     fn test1() {
         let mut monkeys = parse(SAMPLE1);
-        play(&mut monkeys, 20);
+        let business = play(&mut monkeys, 20, 3);
+        assert_eq!(business, 10605);
+    }
+
+    #[test]
+    fn test2() {
+        let mut monkeys = parse(SAMPLE1);
+        let business= play(&mut monkeys, 10000, 1);
+        assert_eq!(business, 2713310158);
     }
 }
