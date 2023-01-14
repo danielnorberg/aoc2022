@@ -1,25 +1,29 @@
+extern crate core;
+
 use std::{fmt, i32};
-use std::fmt::Write;
+use std::cmp::Ordering;
+use std::cmp::Ordering::{Equal, Greater, Less};
 use std::iter::zip;
 use std::str::FromStr;
 
 use itertools::{enumerate, Itertools};
 
-use crate::Order::{CORRECT, EQUAL, INCORRECT};
-
 const INPUT: &str = include_str!("../../input/d13.txt");
+const DIVIDERS: &str = include_str!("../../input/d13_dividers.txt");
 
 fn main() {
     let packets = parse(INPUT);
     let s = write_packets(&packets);
     verify_input(&s, &INPUT.lines().collect_vec());
-    let in_order = compare(&packets);
-    println!("{:#?}", in_order);
-    let sum: usize = in_order.iter().enumerate()
-        .filter(|(_, o)| **o == CORRECT)
+    let ordering = compare_packets(&packets);
+    let sum: usize = ordering.iter().enumerate()
+        .filter(|(_, o)| **o == Less)
         .map(|(i, _)| i + 1)
         .sum();
     println!("sum: {}", sum);
+
+    let key = compute_decoder_key(&packets);
+    println!("key: {}", key);
 }
 
 fn verify_input(a: &Vec<String>, b: &Vec<&str>) {
@@ -41,7 +45,7 @@ fn write_packets(packets: &Vec<(Value, Value)>) -> Vec<String> {
     output
 }
 
-#[derive(Debug, PartialEq, Eq, Hash)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
 enum Value {
     List(Vec<Value>),
     Integer(i32),
@@ -124,25 +128,30 @@ fn parse_list(mut s: &str) -> (Value, usize) {
     }
 }
 
-#[derive(Debug, PartialEq, Eq, Hash)]
-enum Order {
-    CORRECT,
-    INCORRECT,
-    EQUAL,
+fn compare_packets(packets: &Vec<(Value, Value)>) -> Vec<Ordering> {
+    packets.iter().map(|(a, b)| a.partial_cmp(b).unwrap()).collect_vec()
 }
 
-fn compare(packets: &Vec<(Value, Value)>) -> Vec<Order> {
-    packets.iter().map(|(a, b)| compare_value(a, b)).collect_vec()
+impl Ord for Value {
+    fn cmp(&self, other: &Self) -> Ordering {
+        compare_value(self, other)
+    }
 }
 
-fn compare_value(a: &Value, b: &Value) -> Order {
+impl PartialOrd for Value {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+fn compare_value(a: &Value, b: &Value) -> Ordering {
     match (a, b) {
         (Value::Integer(ai), Value::Integer(bi)) => if ai < bi {
-            CORRECT
+            Less
         } else if ai > bi {
-            INCORRECT
+            Greater
         } else {
-            EQUAL
+            Equal
         },
         (Value::Integer(ai), Value::List(_)) =>
             compare_value(
@@ -153,16 +162,16 @@ fn compare_value(a: &Value, b: &Value) -> Order {
         (Value::List(al), Value::List(bl)) => {
             for i in 0.. {
                 if i == al.len() && i == bl.len() {
-                    return EQUAL;
+                    return Equal;
                 }
                 if i == al.len() {
-                    return CORRECT;
+                    return Less;
                 }
                 if i == bl.len() {
-                    return INCORRECT;
+                    return Greater;
                 }
                 let o = compare_value(&al[i], &bl[i]);
-                if o == EQUAL {
+                if o == Equal {
                     continue;
                 }
                 return o;
@@ -170,6 +179,23 @@ fn compare_value(a: &Value, b: &Value) -> Order {
             panic!();
         }
     }
+}
+
+fn compute_decoder_key(packets: &Vec<(Value, Value)>) -> usize {
+    let mut all_packets = packets.iter()
+        .flat_map(|(a, b)| vec![a, b])
+        .collect_vec();
+    let dividers = parse(DIVIDERS);
+    let d1 = &dividers[0].0;
+    let d2 = &dividers[0].1;
+    all_packets.push(d1);
+    all_packets.push(d2);
+    all_packets.sort();
+    all_packets.iter().enumerate()
+        .filter(|(_, p)| **p == d1 || **p == d2)
+        .map(|(i, _)| i + 1)
+        .reduce(|a, b| a * b)
+        .unwrap()
 }
 
 #[cfg(test)]
@@ -183,7 +209,14 @@ mod tests {
         let packets = parse(SAMPLE1);
         let s = write_packets(&packets);
         verify_input(&s, &SAMPLE1.lines().collect_vec());
-        let in_order = compare(&packets);
-        assert_eq!(in_order, vec![CORRECT, CORRECT, INCORRECT, CORRECT, INCORRECT, CORRECT, INCORRECT, INCORRECT]);
+        let in_order = compare_packets(&packets);
+        assert_eq!(in_order, vec![Less, Less, Greater, Less, Greater, Less, Greater, Greater]);
+    }
+
+    #[test]
+    fn test2() {
+        let packets = parse(SAMPLE1);
+        let key = compute_decoder_key(&packets);
+        assert_eq!(key, 140);
     }
 }
