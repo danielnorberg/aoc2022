@@ -147,27 +147,25 @@ fn count_row(sensors: &Vec<Sensor>, row_nr: i32) -> i32 {
         intersections.push((rl, rr));
     }
     intersections.sort();
+    if intersections.is_empty() {
+        return 0;
+    }
     intersections.push((i32::MAX, i32::MAX));
-    let n = if intersections.is_empty() {
-        0
-    } else {
-        let mut nn = 0;
-        let mut r = intersections[0];
-        for i in &intersections[1..] {
-            if i.0 <= r.1 {
-                r.1 = max(r.1, i.1);
-            } else {
-                let beacons_in_range = beacons_in_row
-                    .iter()
-                    .filter(|x| **x >= r.0 && **x <= r.1)
-                    .count() as i32;
-                let rn = 1 + r.1 - r.0 - beacons_in_range;
-                nn += rn;
-                r = *i;
-            }
+    let mut n = 0;
+    let mut r = intersections[0];
+    for i in &intersections[1..] {
+        if i.0 <= r.1 {
+            r.1 = max(r.1, i.1);
+        } else {
+            let beacons_in_range = beacons_in_row
+                .iter()
+                .filter(|x| **x >= r.0 && **x <= r.1)
+                .count() as i32;
+            let rn = 1 + r.1 - r.0 - beacons_in_range;
+            n += rn;
+            r = *i;
         }
-        nn
-    };
+    }
     n
 }
 
