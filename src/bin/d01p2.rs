@@ -1,5 +1,5 @@
-use std::collections::BinaryHeap;
 use aoc2022::read_lines;
+use std::collections::BinaryHeap;
 
 fn main() {
     let lines = read_lines("input/d01.txt").unwrap();
@@ -19,5 +19,3 @@ fn main() {
     let sum_top_three = heap.pop().unwrap() + heap.pop().unwrap() + heap.pop().unwrap();
     println!("{}", sum_top_three);
 }
-
-

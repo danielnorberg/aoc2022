@@ -6,22 +6,24 @@ use aoc2022::read_lines;
 
 fn shape_score(shape: &str) -> i32 {
     match shape {
-        "X" => { 1 }
-        "Y" => { 2 }
-        "Z" => { 3 }
-        _ => { panic!() }
+        "X" => 1,
+        "Y" => 2,
+        "Z" => 3,
+        _ => {
+            panic!()
+        }
     }
 }
 
 fn win_score(their_shape: &str, our_shape: &str) -> i32 {
     match (their_shape, our_shape) {
-        ("C", "X") => { 6 }
-        ("A", "Y") => { 6 }
-        ("B", "Z") => { 6 }
-        ("A", "X") => { 3 }
-        ("B", "Y") => { 3 }
-        ("C", "Z") => { 3 }
-        (_, _) => { 0 }
+        ("C", "X") => 6,
+        ("A", "Y") => 6,
+        ("B", "Z") => 6,
+        ("A", "X") => 3,
+        ("B", "Y") => 3,
+        ("C", "Z") => 3,
+        (_, _) => 0,
     }
 }
 

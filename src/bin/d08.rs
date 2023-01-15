@@ -21,7 +21,8 @@ fn find_viewing_scores(grid: &Vec<Vec<i32>>) -> Vec<Vec<i32>> {
 
     for r in 0..height {
         for c in 0..width {
-            scores[r][c] = find_viewing_score(&grid, r as i32, c as i32, height as i32, width as i32);
+            scores[r][c] =
+                find_viewing_score(&grid, r as i32, c as i32, height as i32, width as i32);
         }
     }
     scores
@@ -34,7 +35,15 @@ fn find_viewing_score(grid: &Vec<Vec<i32>>, r: i32, c: i32, height: i32, width: 
         * viewing_score(grid, r, c, height, width, -1, 0)
 }
 
-fn viewing_score(grid: &Vec<Vec<i32>>, mut ri: i32, mut ci: i32, height: i32, width: i32, dr: i32, dc: i32) -> i32 {
+fn viewing_score(
+    grid: &Vec<Vec<i32>>,
+    mut ri: i32,
+    mut ci: i32,
+    height: i32,
+    width: i32,
+    dr: i32,
+    dc: i32,
+) -> i32 {
     let origin_tree = grid[ri as usize][ci as usize];
     let mut score = 0;
     ri += dr;
@@ -52,7 +61,10 @@ fn viewing_score(grid: &Vec<Vec<i32>>, mut ri: i32, mut ci: i32, height: i32, wi
 }
 
 fn find_visible_trees(grid: &Vec<Vec<i32>>) -> (Vec<BitVec>, usize) {
-    let mut visible = grid.iter().map(|r| BitVec::from_elem(r.len(), false)).collect_vec();
+    let mut visible = grid
+        .iter()
+        .map(|r| BitVec::from_elem(r.len(), false))
+        .collect_vec();
 
     let height = grid.len() as i32;
     let width = grid[0].len() as i32;
@@ -66,11 +78,23 @@ fn find_visible_trees(grid: &Vec<Vec<i32>>) -> (Vec<BitVec>, usize) {
         mark(&grid, &mut visible, height - 1, c, -1, 0, height, width);
     }
 
-    let total_visible = visible.iter().map(|r| r.iter().filter(|c| *c).count()).sum::<usize>();
+    let total_visible = visible
+        .iter()
+        .map(|r| r.iter().filter(|c| *c).count())
+        .sum::<usize>();
     (visible, total_visible)
 }
 
-fn mark(grid: &Vec<Vec<i32>>, visible: &mut Vec<BitVec>, mut ri: i32, mut ci: i32, dr: i32, dc: i32, height: i32, width: i32) {
+fn mark(
+    grid: &Vec<Vec<i32>>,
+    visible: &mut Vec<BitVec>,
+    mut ri: i32,
+    mut ci: i32,
+    dr: i32,
+    dc: i32,
+    height: i32,
+    width: i32,
+) {
     let mut max_tree = -1;
     while ri >= 0 && ri < height as i32 && ci >= 0 && ci < width as i32 {
         let tree = grid[ri as usize][ci as usize];

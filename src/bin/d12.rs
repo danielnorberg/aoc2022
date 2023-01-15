@@ -16,10 +16,14 @@ fn main() {
 
     {
         let starts = find_starts(&game.map);
-        let min_dst = starts.iter().flat_map(|start| {
-            reset(&mut game);
-            bfs(&mut game, *start)
-        }).min().unwrap();
+        let min_dst = starts
+            .iter()
+            .flat_map(|start| {
+                reset(&mut game);
+                bfs(&mut game, *start)
+            })
+            .min()
+            .unwrap();
         println!("{:#?}", min_dst);
     }
 }
@@ -97,32 +101,59 @@ fn bfs(game: &mut Game, start: Point) -> Option<i32> {
 fn parse(s: &str) -> Game {
     let mut start: Option<Point> = None;
     let mut end: Option<Point> = None;
-    let map = s.lines().enumerate()
-        .map(|(y, r)| r.chars().enumerate().map(|(x, c)| {
-            let z = if c == 'S' {
-                start = Some(Point { x: x as i32, y: y as i32 });
-                'a' as i32
-            } else if c == 'E' {
-                end = Some(Point { x: x as i32, y: y as i32 });
-                'z' as i32
-            } else {
-                c as i32
-            };
-            Square { z: z - ('a' as i32), v: false, n: 0 }
-        }).collect_vec())
+    let map = s
+        .lines()
+        .enumerate()
+        .map(|(y, r)| {
+            r.chars()
+                .enumerate()
+                .map(|(x, c)| {
+                    let z = if c == 'S' {
+                        start = Some(Point {
+                            x: x as i32,
+                            y: y as i32,
+                        });
+                        'a' as i32
+                    } else if c == 'E' {
+                        end = Some(Point {
+                            x: x as i32,
+                            y: y as i32,
+                        });
+                        'z' as i32
+                    } else {
+                        c as i32
+                    };
+                    Square {
+                        z: z - ('a' as i32),
+                        v: false,
+                        n: 0,
+                    }
+                })
+                .collect_vec()
+        })
         .collect_vec();
     let width = map[0].len() as i32;
     let height = map.len() as i32;
-    Game { map, start: start.unwrap(), end: end.unwrap(), width, height }
+    Game {
+        map,
+        start: start.unwrap(),
+        end: end.unwrap(),
+        width,
+        height,
+    }
 }
 
 fn find_starts(map: &Map) -> Vec<Point> {
     enumerate(map)
-        .flat_map(|(y, r)|
+        .flat_map(|(y, r)| {
             enumerate(r)
                 .filter(|(_, s)| s.z == 0)
-                .map(|(x, _)| Point { x: x as i32, y: y as i32 })
-                .collect_vec())
+                .map(|(x, _)| Point {
+                    x: x as i32,
+                    y: y as i32,
+                })
+                .collect_vec()
+        })
         .collect_vec()
 }
 
@@ -144,10 +175,14 @@ mod tests {
     fn test2() {
         let mut game = parse(SAMPLE1);
         let starts = find_starts(&game.map);
-        let min_dst = starts.iter().flat_map(|start| {
-            reset(&mut game);
-            bfs(&mut game, *start)
-        }).min().unwrap();
+        let min_dst = starts
+            .iter()
+            .flat_map(|start| {
+                reset(&mut game);
+                bfs(&mut game, *start)
+            })
+            .min()
+            .unwrap();
         println!("{:#?}", min_dst);
     }
 }

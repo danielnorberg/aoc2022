@@ -50,7 +50,9 @@ fn parse_instructions(instructions: &mut Vec<Vec<i32>>, line: String) {
         static ref RE: Regex = Regex::new(r"^move (\d+) from (\d+) to (\d+)$").unwrap();
     }
     let caps = RE.captures(line.as_str()).unwrap();
-    let instruction = caps.iter().skip(1)
+    let instruction = caps
+        .iter()
+        .skip(1)
         .map(|c| i32::from_str(c.unwrap().as_str()).unwrap())
         .collect();
     instructions.push(instruction)

@@ -28,10 +28,14 @@ fn main() {
 
     let mut sum_prio = 0;
 
-    let lines: Vec<String> = read_lines("input/d03.txt").unwrap().map(|l| l.unwrap()).collect();
+    let lines: Vec<String> = read_lines("input/d03.txt")
+        .unwrap()
+        .map(|l| l.unwrap())
+        .collect();
     let groups = lines.chunks(3);
     for group in groups {
-        let group_intersection: HashSet<char> = group.iter()
+        let group_intersection: HashSet<char> = group
+            .iter()
             .map(|g| HashSet::from_iter(g.chars()))
             .reduce(|acc, g| acc.intersection(&g).copied().collect())
             .unwrap();

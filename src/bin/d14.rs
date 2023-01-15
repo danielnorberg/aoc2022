@@ -1,6 +1,5 @@
 extern crate core;
 
-
 use std::collections::HashMap;
 use std::fmt;
 use std::iter::zip;
@@ -77,7 +76,6 @@ impl fmt::Display for Path {
     }
 }
 
-
 fn main() {
     {
         let paths = parse(INPUT);
@@ -109,14 +107,13 @@ fn parse(s: &str) -> Vec<Path> {
 }
 
 fn parse_path(s: &str) -> Path {
-    let points = s.split(" -> ")
-        .map(|p| p
-            .split_once(',').unwrap())
-        .map(|(x, y)|
-            Point {
-                x: i32::from_str(x).unwrap(),
-                y: i32::from_str(y).unwrap(),
-            })
+    let points = s
+        .split(" -> ")
+        .map(|p| p.split_once(',').unwrap())
+        .map(|(x, y)| Point {
+            x: i32::from_str(x).unwrap(),
+            y: i32::from_str(y).unwrap(),
+        })
         .collect_vec();
     Path { points }
 }
@@ -124,7 +121,6 @@ fn parse_path(s: &str) -> Path {
 fn print_paths(paths: &Vec<Path>) {
     paths.iter().for_each(|p| println!("{}", p))
 }
-
 
 fn draw_map(paths: &Vec<Path>, floor: bool) -> Map {
     let mut left = i32::MAX;
@@ -136,7 +132,8 @@ fn draw_map(paths: &Vec<Path>, floor: bool) -> Map {
     for path in paths {
         for (a, b) in zip(
             &path.points[0..path.points.len() - 1],
-            &path.points[1..path.points.len()]) {
+            &path.points[1..path.points.len()],
+        ) {
             left = [left, a.x, b.x].into_iter().min().unwrap();
             right = [right, a.x, b.x].into_iter().max().unwrap();
             top = [top, a.y, b.y, 0].into_iter().min().unwrap();
@@ -153,7 +150,14 @@ fn draw_map(paths: &Vec<Path>, floor: bool) -> Map {
             }
         }
     }
-    Map { cells, left, right, top, bottom, floor: if floor { Some(bottom + 2) } else { None } }
+    Map {
+        cells,
+        left,
+        right,
+        top,
+        bottom,
+        floor: if floor { Some(bottom + 2) } else { None },
+    }
 }
 
 fn print_map(map: &Map) {
@@ -183,8 +187,14 @@ fn add_sand(map: &mut Map, mut p: Point) -> bool {
                 break;
             }
         }
-        let down_left = Point { x: p.x - 1, y: p.y + 1 };
-        let down_right = Point { x: p.x + 1, y: p.y + 1 };
+        let down_left = Point {
+            x: p.x - 1,
+            y: p.y + 1,
+        };
+        let down_right = Point {
+            x: p.x + 1,
+            y: p.y + 1,
+        };
         if map.cells.get(&down).is_none() {
             p = down;
         } else if map.cells.get(&down_left).is_none() {

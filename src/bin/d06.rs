@@ -1,6 +1,6 @@
+use itertools::Itertools as _;
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
-use itertools::Itertools as _;
 
 const INPUT: &str = include_str!("../../input/d06.txt");
 
@@ -70,33 +70,81 @@ mod tests {
     fn test1() {
         assert_eq!(find_message("bvwbjplbgvbhsrlpgdmjqwftvncz", 4).unwrap(), 5);
         assert_eq!(find_message("nppdvjthqldpwncqszvftbrmjlhg", 4).unwrap(), 6);
-        assert_eq!(find_message("nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg", 4).unwrap(), 10);
-        assert_eq!(find_message("zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw", 4).unwrap(), 11);
+        assert_eq!(
+            find_message("nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg", 4).unwrap(),
+            10
+        );
+        assert_eq!(
+            find_message("zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw", 4).unwrap(),
+            11
+        );
     }
 
     #[test]
     fn test1_hist() {
-        assert_eq!(find_message_hist("bvwbjplbgvbhsrlpgdmjqwftvncz", 4).unwrap(), 5);
-        assert_eq!(find_message_hist("nppdvjthqldpwncqszvftbrmjlhg", 4).unwrap(), 6);
-        assert_eq!(find_message_hist("nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg", 4).unwrap(), 10);
-        assert_eq!(find_message_hist("zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw", 4).unwrap(), 11);
+        assert_eq!(
+            find_message_hist("bvwbjplbgvbhsrlpgdmjqwftvncz", 4).unwrap(),
+            5
+        );
+        assert_eq!(
+            find_message_hist("nppdvjthqldpwncqszvftbrmjlhg", 4).unwrap(),
+            6
+        );
+        assert_eq!(
+            find_message_hist("nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg", 4).unwrap(),
+            10
+        );
+        assert_eq!(
+            find_message_hist("zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw", 4).unwrap(),
+            11
+        );
     }
 
     #[test]
     fn test2() {
-        assert_eq!(find_message("mjqjpqmgbljsphdztnvjfqwrcgsmlb", 14).unwrap(), 19);
-        assert_eq!(find_message("bvwbjplbgvbhsrlpgdmjqwftvncz", 14).unwrap(), 23);
-        assert_eq!(find_message("nppdvjthqldpwncqszvftbrmjlhg", 14).unwrap(), 23);
-        assert_eq!(find_message("nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg", 14).unwrap(), 29);
-        assert_eq!(find_message("zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw", 14).unwrap(), 26);
+        assert_eq!(
+            find_message("mjqjpqmgbljsphdztnvjfqwrcgsmlb", 14).unwrap(),
+            19
+        );
+        assert_eq!(
+            find_message("bvwbjplbgvbhsrlpgdmjqwftvncz", 14).unwrap(),
+            23
+        );
+        assert_eq!(
+            find_message("nppdvjthqldpwncqszvftbrmjlhg", 14).unwrap(),
+            23
+        );
+        assert_eq!(
+            find_message("nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg", 14).unwrap(),
+            29
+        );
+        assert_eq!(
+            find_message("zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw", 14).unwrap(),
+            26
+        );
     }
 
     #[test]
     fn test2_hist() {
-        assert_eq!(find_message_hist("mjqjpqmgbljsphdztnvjfqwrcgsmlb", 14).unwrap(), 19);
-        assert_eq!(find_message_hist("bvwbjplbgvbhsrlpgdmjqwftvncz", 14).unwrap(), 23);
-        assert_eq!(find_message_hist("nppdvjthqldpwncqszvftbrmjlhg", 14).unwrap(), 23);
-        assert_eq!(find_message_hist("nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg", 14).unwrap(), 29);
-        assert_eq!(find_message_hist("zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw", 14).unwrap(), 26);
+        assert_eq!(
+            find_message_hist("mjqjpqmgbljsphdztnvjfqwrcgsmlb", 14).unwrap(),
+            19
+        );
+        assert_eq!(
+            find_message_hist("bvwbjplbgvbhsrlpgdmjqwftvncz", 14).unwrap(),
+            23
+        );
+        assert_eq!(
+            find_message_hist("nppdvjthqldpwncqszvftbrmjlhg", 14).unwrap(),
+            23
+        );
+        assert_eq!(
+            find_message_hist("nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg", 14).unwrap(),
+            29
+        );
+        assert_eq!(
+            find_message_hist("zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw", 14).unwrap(),
+            26
+        );
     }
 }

@@ -1,10 +1,10 @@
+use lazy_static::lazy_static;
+use regex::Regex;
 use std::cell::RefCell;
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use std::rc::Rc;
 use std::str::FromStr;
-use lazy_static::lazy_static;
-use regex::Regex;
 
 const INPUT: &str = include_str!("../../input/d07.txt");
 
@@ -36,7 +36,11 @@ impl Dir {
 
     pub fn sum_size_le(&self, max_size: usize) -> usize {
         let this = self.size();
-        let dirs_sum = self.dirs.iter().map(|(_, dir)| dir.borrow().sum_size_le(max_size)).sum();
+        let dirs_sum = self
+            .dirs
+            .iter()
+            .map(|(_, dir)| dir.borrow().sum_size_le(max_size))
+            .sum();
         if this < max_size {
             dirs_sum + this
         } else {
@@ -46,12 +50,18 @@ impl Dir {
 
     pub fn find_min_size_ge(&self, min_size: usize) -> Option<usize> {
         let this = Some(self.size()).filter(|s| s >= &min_size);
-        let min_dir = self.dirs.iter()
+        let min_dir = self
+            .dirs
+            .iter()
             .map(|(_, dir)| dir.borrow().find_min_size_ge(min_size))
             .filter(|o| o.is_some())
             .map(|o| o.unwrap())
             .min();
-        [this, min_dir].iter().flat_map(|n| n.iter()).min().map(|c| *c)
+        [this, min_dir]
+            .iter()
+            .flat_map(|n| n.iter())
+            .min()
+            .map(|c| *c)
     }
 }
 
@@ -74,8 +84,8 @@ fn parse(input: &str) -> DirRc {
         } else if line.starts_with("$ cd ") {
             let dirname = &line[5..];
             let next_dir = match dir.as_ref().borrow_mut().dirs.entry(String::from(dirname)) {
-                Entry::Occupied(o) => { o.get().clone() }
-                Entry::Vacant(v) => { v.insert(Dir::new_rc()).clone() }
+                Entry::Occupied(o) => o.get().clone(),
+                Entry::Vacant(v) => v.insert(Dir::new_rc()).clone(),
             };
             path.push(dir);
             dir = next_dir;
@@ -83,9 +93,12 @@ fn parse(input: &str) -> DirRc {
             continue;
         } else if line.starts_with("dir ") {
             let dirname = &line[4..];
-            match (*dir.as_ref().borrow_mut()).dirs.entry(String::from(dirname)) {
-                Entry::Occupied(o) => { o.get() }
-                Entry::Vacant(v) => { v.insert(Dir::new_rc()) }
+            match (*dir.as_ref().borrow_mut())
+                .dirs
+                .entry(String::from(dirname))
+            {
+                Entry::Occupied(o) => o.get(),
+                Entry::Vacant(v) => v.insert(Dir::new_rc()),
             };
         } else {
             let caps = FILE_RE.captures(&line);
@@ -94,11 +107,13 @@ fn parse(input: &str) -> DirRc {
                     let size = usize::from_str(c.name("size").unwrap().as_str()).unwrap();
                     let name = c.name("name").unwrap().as_str();
                     match (*dir.as_ref().borrow_mut()).files.entry(String::from(name)) {
-                        Entry::Occupied(o) => { o.get() }
-                        Entry::Vacant(v) => { v.insert(size) }
+                        Entry::Occupied(o) => o.get(),
+                        Entry::Vacant(v) => v.insert(size),
                     };
                 }
-                None => { panic!(); }
+                None => {
+                    panic!();
+                }
             }
         }
     }
@@ -117,7 +132,9 @@ fn find_dir_to_delete(root: DirRc) -> usize {
     let disk_space_used = root.borrow().size();
     let disk_space_free = total_disk_space - disk_space_used;
     let additional_disk_space_required = disk_space_required - disk_space_free;
-    root.borrow().find_min_size_ge(additional_disk_space_required).unwrap()
+    root.borrow()
+        .find_min_size_ge(additional_disk_space_required)
+        .unwrap()
 }
 
 #[cfg(test)]

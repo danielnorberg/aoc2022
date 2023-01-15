@@ -23,16 +23,14 @@ fn parse_row(s: &str) -> Option<Inst> {
     let mut parts = s.trim().split_whitespace();
     let t = Inst::from_str(parts.next()?).ok()?;
     let i = match t {
-        Inst::Addx(_) => { Inst::Addx(parts.next()?.parse::<i32>().ok()?) }
-        _ => t
+        Inst::Addx(_) => Inst::Addx(parts.next()?.parse::<i32>().ok()?),
+        _ => t,
     };
     Some(i)
 }
 
 fn parse(s: &str) -> Vec<Inst> {
-    return s.lines()
-        .flat_map(|l| parse_row(l))
-        .collect_vec();
+    return s.lines().flat_map(|l| parse_row(l)).collect_vec();
 }
 
 fn execute(insts: &Vec<Inst>) -> (i32, Vec<String>) {
@@ -44,12 +42,8 @@ fn execute(insts: &Vec<Inst>) -> (i32, Vec<String>) {
     let mut rows = Vec::<String>::new();
     for i in insts {
         let (cycles, result) = match i {
-            Inst::Noop => {
-                (1, reg)
-            }
-            Inst::Addx(x) => {
-                (2, reg + x)
-            }
+            Inst::Noop => (1, reg),
+            Inst::Addx(x) => (2, reg + x),
         };
         for _ in 0..cycles {
             if (cycle - 20) % 40 == 0 {

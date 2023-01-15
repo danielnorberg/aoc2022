@@ -1,5 +1,5 @@
-use std::collections::HashSet;
 use aoc2022::read_lines;
+use std::collections::HashSet;
 
 const LOWER_A: i32 = 'a' as i32;
 const LOWER_Z: i32 = 'z' as i32;

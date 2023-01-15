@@ -1,5 +1,5 @@
-use std::cmp::max;
 use aoc2022::try_read_lines;
+use std::cmp::max;
 
 fn main() {
     let lines = try_read_lines("input/d01.txt");

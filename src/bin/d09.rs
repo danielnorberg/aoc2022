@@ -37,7 +37,10 @@ impl ops::Add<Pos> for Pos {
     type Output = Pos;
 
     fn add(self, _rhs: Pos) -> Pos {
-        Pos { x: self.x + _rhs.x, y: self.y + _rhs.y }
+        Pos {
+            x: self.x + _rhs.x,
+            y: self.y + _rhs.y,
+        }
     }
 }
 
@@ -49,9 +52,7 @@ fn parse_row(s: &str) -> Option<Move> {
 }
 
 fn parse(s: &str) -> Vec<Move> {
-    return s.lines()
-        .flat_map(|l| parse_row(l))
-        .collect_vec();
+    return s.lines().flat_map(|l| parse_row(l)).collect_vec();
 }
 
 fn count_tail_positions(moves: &Vec<Move>, n_knots: usize) -> usize {

@@ -1,10 +1,10 @@
 extern crate core;
 
-use std::{fmt, i32};
 use std::cmp::Ordering;
 use std::cmp::Ordering::{Equal, Greater, Less};
 use std::iter::zip;
 use std::str::FromStr;
+use std::{fmt, i32};
 
 use itertools::{enumerate, Itertools};
 
@@ -16,7 +16,9 @@ fn main() {
     let s = write_packets(&packets);
     verify_input(&s, &INPUT.lines().collect_vec());
     let ordering = compare_packets(&packets);
-    let sum: usize = ordering.iter().enumerate()
+    let sum: usize = ordering
+        .iter()
+        .enumerate()
         .filter(|(_, o)| **o == Less)
         .map(|(i, _)| i + 1)
         .sum();
@@ -70,9 +72,7 @@ impl fmt::Display for Value {
 }
 
 fn parse(s: &str) -> Vec<(Value, Value)> {
-    let gs = s.lines()
-        .map(|l| l.trim())
-        .group_by(|l| l.is_empty());
+    let gs = s.lines().map(|l| l.trim()).group_by(|l| l.is_empty());
     let mut pairs = Vec::new();
     for (_, lines) in &gs {
         let ls = lines.collect_vec();
@@ -129,7 +129,10 @@ fn parse_list(mut s: &str) -> (Value, usize) {
 }
 
 fn compare_packets(packets: &Vec<(Value, Value)>) -> Vec<Ordering> {
-    packets.iter().map(|(a, b)| a.partial_cmp(b).unwrap()).collect_vec()
+    packets
+        .iter()
+        .map(|(a, b)| a.partial_cmp(b).unwrap())
+        .collect_vec()
 }
 
 impl Ord for Value {
@@ -146,19 +149,21 @@ impl PartialOrd for Value {
 
 fn compare_value(a: &Value, b: &Value) -> Ordering {
     match (a, b) {
-        (Value::Integer(ai), Value::Integer(bi)) => if ai < bi {
-            Less
-        } else if ai > bi {
-            Greater
-        } else {
-            Equal
-        },
-        (Value::Integer(ai), Value::List(_)) =>
-            compare_value(
-                &Value::List(vec![Value::Integer(*ai)]), b),
-        (Value::List(_), Value::Integer(bi)) =>
-            compare_value(
-                a, &Value::List(vec![Value::Integer(*bi)])),
+        (Value::Integer(ai), Value::Integer(bi)) => {
+            if ai < bi {
+                Less
+            } else if ai > bi {
+                Greater
+            } else {
+                Equal
+            }
+        }
+        (Value::Integer(ai), Value::List(_)) => {
+            compare_value(&Value::List(vec![Value::Integer(*ai)]), b)
+        }
+        (Value::List(_), Value::Integer(bi)) => {
+            compare_value(a, &Value::List(vec![Value::Integer(*bi)]))
+        }
         (Value::List(al), Value::List(bl)) => {
             for i in 0.. {
                 if i == al.len() && i == bl.len() {
@@ -182,16 +187,16 @@ fn compare_value(a: &Value, b: &Value) -> Ordering {
 }
 
 fn compute_decoder_key(packets: &Vec<(Value, Value)>) -> usize {
-    let mut all_packets = packets.iter()
-        .flat_map(|(a, b)| vec![a, b])
-        .collect_vec();
+    let mut all_packets = packets.iter().flat_map(|(a, b)| vec![a, b]).collect_vec();
     let dividers = parse(DIVIDERS);
     let d1 = &dividers[0].0;
     let d2 = &dividers[0].1;
     all_packets.push(d1);
     all_packets.push(d2);
     all_packets.sort();
-    all_packets.iter().enumerate()
+    all_packets
+        .iter()
+        .enumerate()
         .filter(|(_, p)| **p == d1 || **p == d2)
         .map(|(i, _)| i + 1)
         .reduce(|a, b| a * b)
@@ -210,7 +215,10 @@ mod tests {
         let s = write_packets(&packets);
         verify_input(&s, &SAMPLE1.lines().collect_vec());
         let in_order = compare_packets(&packets);
-        assert_eq!(in_order, vec![Less, Less, Greater, Less, Greater, Less, Greater, Greater]);
+        assert_eq!(
+            in_order,
+            vec![Less, Less, Greater, Less, Greater, Less, Greater, Greater]
+        );
     }
 
     #[test]
