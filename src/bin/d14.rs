@@ -50,6 +50,7 @@ struct Map {
     right: i32,
     top: i32,
     bottom: i32,
+    floor: Option<i32>,
 }
 
 impl fmt::Display for Point {
@@ -78,15 +79,29 @@ impl fmt::Display for Path {
 
 
 fn main() {
-    let paths = parse(INPUT);
-    print_paths(&paths);
-    let mut map = draw_map(&paths);
-    println!();
-    print_map(&map);
-    let sand = pour_sand(&mut map);
-    println!();
-    print_map(&map);
-    println!("sand: {}", sand);
+    {
+        let paths = parse(INPUT);
+        print_paths(&paths);
+        let mut map = draw_map(&paths, false);
+        println!();
+        print_map(&map);
+        let sand = pour_sand(&mut map);
+        println!();
+        print_map(&map);
+        println!("sand: {}", sand);
+    }
+
+    {
+        let paths = parse(INPUT);
+        print_paths(&paths);
+        let mut map = draw_map(&paths, true);
+        println!();
+        print_map(&map);
+        let sand = pour_sand(&mut map);
+        println!();
+        print_map(&map);
+        println!("sand: {}", sand);
+    }
 }
 
 fn parse(s: &str) -> Vec<Path> {
@@ -111,7 +126,7 @@ fn print_paths(paths: &Vec<Path>) {
 }
 
 
-fn draw_map(paths: &Vec<Path>) -> Map {
+fn draw_map(paths: &Vec<Path>, floor: bool) -> Map {
     let mut left = i32::MAX;
     let mut right = i32::MIN;
     let mut top = i32::MAX;
@@ -138,7 +153,7 @@ fn draw_map(paths: &Vec<Path>) -> Map {
             }
         }
     }
-    Map { cells, left, right, top, bottom }
+    Map { cells, left, right, top, bottom, floor: if floor { Some(bottom + 2) } else { None } }
 }
 
 fn print_map(map: &Map) {
@@ -157,8 +172,17 @@ fn print_map(map: &Map) {
 }
 
 fn add_sand(map: &mut Map, mut p: Point) -> bool {
+    match (map.floor, map.cells.get(&p)) {
+        (Some(_), Some(Sand)) => return false,
+        _ => {}
+    }
     loop {
         let down = Point { x: p.x, y: p.y + 1 };
+        if let Some(floor) = map.floor {
+            if floor == down.y {
+                break;
+            }
+        }
         let down_left = Point { x: p.x - 1, y: p.y + 1 };
         let down_right = Point { x: p.x + 1, y: p.y + 1 };
         if map.cells.get(&down).is_none() {
@@ -170,7 +194,7 @@ fn add_sand(map: &mut Map, mut p: Point) -> bool {
         } else {
             break;
         }
-        if p.y >= map.bottom {
+        if map.floor.is_none() && p.y >= map.bottom {
             return false;
         }
     }
@@ -180,8 +204,8 @@ fn add_sand(map: &mut Map, mut p: Point) -> bool {
 
 fn pour_sand(mut map: &mut Map) -> i32 {
     for i in 0.. {
-        let rested = add_sand(&mut map, Point::new(500, 0));
-        if !rested {
+        let more = add_sand(&mut map, Point::new(500, 0));
+        if !more {
             return i;
         }
     }
@@ -198,12 +222,25 @@ mod tests {
     fn test1() {
         let paths = parse(SAMPLE1);
         print_paths(&paths);
-        let mut map = draw_map(&paths);
+        let mut map = draw_map(&paths, false);
         println!();
         print_map(&map);
         let sand = pour_sand(&mut map);
         println!();
         print_map(&map);
         assert_eq!(sand, 24);
+    }
+
+    #[test]
+    fn test2() {
+        let paths = parse(SAMPLE1);
+        print_paths(&paths);
+        let mut map = draw_map(&paths, true);
+        println!();
+        print_map(&map);
+        let sand = pour_sand(&mut map);
+        println!();
+        print_map(&map);
+        assert_eq!(sand, 93);
     }
 }
