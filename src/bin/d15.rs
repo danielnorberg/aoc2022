@@ -125,20 +125,13 @@ fn draw_map(sensors: &Vec<Sensor>) -> Map {
 }
 
 fn count_row(sensors: &Vec<Sensor>, row_nr: i32) -> i32 {
-    let sensors_in_row = sensors
-        .iter()
-        .filter(|s| s.point.y == row_nr)
-        .map(|s| s.point.x)
-        .unique()
-        .collect_vec();
     let beacons_in_row = sensors
         .iter()
         .filter(|s| s.beacon.y == row_nr)
         .map(|s| s.beacon.x)
         .unique()
         .collect_vec();
-    let mut left = i32::MAX;
-    let mut right = i32::MIN;
+    let mut intersections = Vec::<(i32, i32)>::new();
     for s in sensors {
         let dst = manhattan_distance(&s.point, &s.beacon);
         let min_y = s.point.y - dst;
@@ -151,10 +144,30 @@ fn count_row(sensors: &Vec<Sensor>, row_nr: i32) -> i32 {
         let rx = dst - dy;
         let rl = s.point.x - rx;
         let rr = s.point.x + rx;
-        left = min(left, rl);
-        right = max(right, rr);
+        intersections.push((rl, rr));
     }
-    let n = 1 + right - left - sensors_in_row.len() as i32 - beacons_in_row.len() as i32;
+    intersections.sort();
+    intersections.push((i32::MAX, i32::MAX));
+    let n = if intersections.is_empty() {
+        0
+    } else {
+        let mut nn = 0;
+        let mut r = intersections[0];
+        for i in &intersections[1..] {
+            if i.0 <= r.1 {
+                r.1 = max(r.1, i.1);
+            } else {
+                let beacons_in_range = beacons_in_row
+                    .iter()
+                    .filter(|x| **x >= r.0 && **x <= r.1)
+                    .count() as i32;
+                let rn = 1 + r.1 - r.0 - beacons_in_range;
+                nn += rn;
+                r = *i;
+            }
+        }
+        nn
+    };
     n
 }
 
@@ -202,7 +215,9 @@ mod tests {
         println!("{:#?}", &sensors);
         let mut map = draw_map(&sensors);
         print_map(&map);
-        let n = count_row(&sensors, 10);
-        assert_eq!(n, 26)
+        let n10 = count_row(&sensors, 10);
+        assert_eq!(n10, 26);
+        let n11 = count_row(&sensors, 11);
+        assert_eq!(n11, 28);
     }
 }
