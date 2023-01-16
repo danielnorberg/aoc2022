@@ -165,6 +165,8 @@ fn count_row(sensors: &Vec<Sensor>, row_nr: i32) -> i32 {
                 if bx >= r.0 && bx <= r.1 {
                     bn += 1;
                     beacons.pop();
+                } else {
+                    break;
                 }
             }
             let rn = 1 + r.1 - r.0 - bn;
