@@ -125,12 +125,14 @@ fn draw_map(sensors: &Vec<Sensor>) -> Map {
 }
 
 fn count_row(sensors: &Vec<Sensor>, row_nr: i32) -> i32 {
-    let beacons_in_row = sensors
+    let mut beacons = sensors
         .iter()
         .filter(|s| s.beacon.y == row_nr)
         .map(|s| s.beacon.x)
         .unique()
+        .sorted()
         .collect_vec();
+    beacons.reverse();
     let mut intersections = Vec::<(i32, i32)>::new();
     for s in sensors {
         let dst = manhattan_distance(&s.point, &s.beacon);
@@ -157,11 +159,15 @@ fn count_row(sensors: &Vec<Sensor>, row_nr: i32) -> i32 {
         if i.0 <= r.1 {
             r.1 = max(r.1, i.1);
         } else {
-            let beacons_in_range = beacons_in_row
-                .iter()
-                .filter(|x| **x >= r.0 && **x <= r.1)
-                .count() as i32;
-            let rn = 1 + r.1 - r.0 - beacons_in_range;
+            let mut bn = 0;
+            while !beacons.is_empty() {
+                let bx = *beacons.last().unwrap();
+                if bx >= r.0 && bx <= r.1 {
+                    bn += 1;
+                    beacons.pop();
+                }
+            }
+            let rn = 1 + r.1 - r.0 - bn;
             n += rn;
             r = *i;
         }
