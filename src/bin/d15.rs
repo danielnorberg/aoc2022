@@ -1,13 +1,12 @@
-extern crate core;
+#![allow(dead_code)]
 
 use std::cmp::{max, min};
-use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use std::fmt;
 use std::ops::AddAssign;
 use std::str::FromStr;
 
-use itertools::{enumerate, Itertools};
+use itertools::Itertools;
 use lazy_static::lazy_static;
 use regex::Regex;
 
@@ -23,12 +22,6 @@ struct Point {
 struct Sensor {
     point: Point,
     beacon: Point,
-}
-
-impl Point {
-    pub(crate) fn new(x: i32, y: i32) -> Point {
-        Point { x, y }
-    }
 }
 
 impl AddAssign for Point {
