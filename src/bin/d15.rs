@@ -67,12 +67,13 @@ impl fmt::Debug for Point {
 }
 
 fn main() {
-    {
-        let sensors = parse(INPUT);
-        println!("{:#?}", &sensors);
-        let n = count_row(&sensors, 2000000);
-        println!("{}", n);
-    }
+    let sensors = parse(INPUT);
+    println!("{:#?}", &sensors);
+    let (n, _) = count_row(&sensors, 2000000, i32::MIN, i32::MAX);
+    println!("{}", n);
+
+    let f = find_tuning_frequency(&sensors, 4000000);
+    println!("f: {}", f);
 }
 
 fn parse(s: &str) -> Vec<Sensor> {
@@ -124,7 +125,7 @@ fn draw_map(sensors: &Vec<Sensor>) -> Map {
     map
 }
 
-fn count_row(sensors: &Vec<Sensor>, row_nr: i32) -> i32 {
+fn count_row(sensors: &Vec<Sensor>, row_nr: i32, left: i32, right: i32) -> (i32, Option<i32>) {
     let mut beacons = sensors
         .iter()
         .filter(|s| s.beacon.y == row_nr)
@@ -150,15 +151,21 @@ fn count_row(sensors: &Vec<Sensor>, row_nr: i32) -> i32 {
     }
     intersections.sort();
     if intersections.is_empty() {
-        return 0;
+        return (0, None);
     }
     intersections.push((i32::MAX, i32::MAX));
     let mut n = 0;
     let mut r = intersections[0];
+    let mut first_empty: Option<i32> = None;
     for i in &intersections[1..] {
-        if i.0 <= r.1 {
+        if i.0 <= r.1 + 1 {
             r.1 = max(r.1, i.1);
         } else {
+            let ex = r.1 + 1;
+            if ex >= left && ex <= right {
+                println!("i:{:?}, r:{:?}", i, r);
+                first_empty = Some(ex);
+            }
             let mut bn = 0;
             while !beacons.is_empty() {
                 let bx = *beacons.last().unwrap();
@@ -174,7 +181,7 @@ fn count_row(sensors: &Vec<Sensor>, row_nr: i32) -> i32 {
             r = *i;
         }
     }
-    n
+    (n, first_empty)
 }
 
 fn insert(map: &mut Map, x: i32, y: i32, item: Item) {
@@ -209,6 +216,16 @@ fn print_map(map: &Map) {
     }
 }
 
+fn find_tuning_frequency(sensors: &Vec<Sensor>, limit: i32) -> i64 {
+    for y in 0..limit {
+        if let (_, Some(x)) = count_row(sensors, y, 0, limit) {
+            return y as i64 + (x as i64) * 4000000;
+        }
+    }
+    0
+}
+
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -221,9 +238,23 @@ mod tests {
         println!("{:#?}", &sensors);
         let mut map = draw_map(&sensors);
         print_map(&map);
-        let n10 = count_row(&sensors, 10);
+        let (n10, _) = count_row(&sensors, 10, i32::MIN, i32::MAX);
         assert_eq!(n10, 26);
-        let n11 = count_row(&sensors, 11);
+        let (n11, _) = count_row(&sensors, 11, i32::MIN, i32::MAX);
         assert_eq!(n11, 28);
+
+        let (_, ex) = count_row(&sensors, 11, 0, 20);
+        assert_eq!(ex, Some(14));
+
+        for y in 0..20 {
+            if y == 11 {
+                continue;
+            }
+            let (_, ex) = count_row(&sensors, y, 0, 20);
+            assert_eq!((y, ex), (y, None));
+        }
+
+        let f = find_tuning_frequency(&sensors, 20);
+        assert_eq!(f, 56000011);
     }
 }
